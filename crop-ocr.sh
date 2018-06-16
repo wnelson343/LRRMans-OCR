@@ -1,4 +1,3 @@
-frame=1080test
 
 box_speed=100:45:1660:730
 box_time=86:23:869:980
@@ -8,7 +7,12 @@ box_laptime=170:37:960:918
 box_storm=100:60:1750:60
 box_fuel=80:40:1680:680
 
-rm $1-*
+ls $1*.png | more > currentframes
+for frame in `cat currentframes`
+do
+echo "Processing $frame"
+
+#rm $1-*
 #spedometer
 #ffmpeg -loglevel 16 -i $frame.png -vf "crop=100:45:1660:730" $frame-speed.png
 
@@ -30,15 +34,16 @@ rm $1-*
 #fuel gauge
 #ffmpeg -loglevel 16 -i $frame.png -vf "crop=80:40:1680:680" $frame-fuel.png
 
-ffmpeg -loglevel 16 -i $1.png -filter_complex "[0:v]split=7[in1][in2][in3][in4][in5][in6][in7];[in1]crop=$box_speed[out1];[in2]crop=$box_time[out2];[in3]crop=$box_lap[out3];[in4]crop=$box_position[out4];[in5]crop=$box_laptime[out5];[in6]crop=$box_storm[out6];[in7]crop=$box_fuel[out7]" \
-	-map '[out1]' $1-speed.png \
-	-map '[out2]' $1-time.png \
-	-map '[out3]' $1-lap.png \
-	-map '[out4]' $1-position.png \
-	-map '[out5]' $1-laptime.png \
-	-map '[out6]' $1-storm.png \
-	-map '[out7]' $1-fuel.png
+ffmpeg -loglevel 16 -i $frame -filter_complex "[0:v]split=7[in1][in2][in3][in4][in5][in6][in7];[in1]crop=$box_speed[out1];[in2]crop=$box_time[out2];[in3]crop=$box_lap[out3];[in4]crop=$box_position[out4];[in5]crop=$box_laptime[out5];[in6]crop=$box_storm[out6];[in7]crop=$box_fuel[out7]" \
+	-map '[out1]' speed-$frame \
+	-map '[out2]' time-$frame \
+	-map '[out3]' lap-$frame \
+	-map '[out4]' position-$frame \
+	-map '[out5]' laptime-$frame \
+	-map '[out6]' storm-$frame \
+	-map '[out7]' fuel-$frame
 
-
-ls $1-* | more > allcropped
-tesseract allcropped stdout
+ls *-$frame | more > allcropped
+tesseract allcropped $frame
+rm *-$frame
+done
